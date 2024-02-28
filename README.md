@@ -19,7 +19,7 @@ pip install requirements.txt
 python -m eightpack.cli dev-db
 # In a different terminal window:
 python -m eightpack.cli import-drafts
-# Launching currently not implemented
+python -m eightpack.app  # this starts the webserver, default port 8003
 ```
 
 ### Frontend

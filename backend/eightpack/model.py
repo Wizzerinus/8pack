@@ -69,5 +69,7 @@ class Player(Base):
     __tablename__ = "players"
     id: Mapped[int] = mapped_column(primary_key=True)
     login: Mapped[str] = mapped_column(String(64))
-    password: Mapped[str] = mapped_column(String(128))
+    password: Mapped[str] = mapped_column(String(256))
     virtual: Mapped[bool] = mapped_column(default=False)
+
+    __table_args__ = (UniqueConstraint("login"),)

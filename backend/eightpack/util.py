@@ -6,13 +6,18 @@ from typing import TypeVar
 
 import requests
 from jose import jwt
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from eightpack import model
 from eightpack.config import app_config
-from eightpack.data import SignedToken
 
 T = TypeVar("T", bound=BaseModel)
+
+
+class SignedToken(BaseModel):
+    issuer: str = Field(alias="iss", default=app_config.JWT_ISSUER, init_var=False)
+    user_id: str = Field(alias="sub", default=...)
+    expiry_date: datetime = Field(alias="exp", default=...)
 
 
 def paginate_scryfall_get(t: type[T], url: str) -> list[T]:
@@ -60,7 +65,7 @@ def hash_password(password: str, salt: bytes, algo: str):
     return ";".join([algo, salt.hex(), pass_hash.hex()])
 
 
-def validate_password(pass_hash: str, password: str):
+def validate_password(password: str, pass_hash: str):
     algo, salt_hex, _ = pass_hash.split(";")
     return compare_digest(pass_hash, hash_password(password, bytes.fromhex(salt_hex), algo))
 

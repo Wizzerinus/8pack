@@ -6,8 +6,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from starlette.requests import Request
 
 from eightpack import model
-from eightpack.data import SignedToken
-from eightpack.util import read_token
+from eightpack.util import read_token, SignedToken
 
 
 class EngineGlobal:

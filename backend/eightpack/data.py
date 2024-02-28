@@ -1,19 +1,13 @@
 import abc
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TypeVar, Generic, Any, Collection
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from slugify import slugify
 from sqlalchemy import Select, Result
 
 from eightpack import model
-from eightpack.config import app_config
-
-
-class SignedToken(BaseModel):
-    issuer: str = Field(alias="iss", default=app_config.JWT_ISSUER, init_var=False)
-    user_id: str = Field(alias="sub", default=...)
-    expiry_date: datetime = Field(alias="exp", default=...)
+from eightpack.util import sign_token
 
 
 class FromObjectModel(BaseModel, abc.ABC):
@@ -97,27 +91,49 @@ class UserTokenResponse(BaseModel):
     token: str
 
     @classmethod
-    def from_user(cls, user: model.Player) -> "UserTokenResponse":
-        # TODO
-        pass
+    def from_object(cls, user: model.Player) -> "UserTokenResponse":
+        return cls(token=sign_token(user, timedelta(days=14)))
+
+
+class CardResponse(BaseModel):
+    id: int
+    name: str
+    image: str
+    art_image: str
+    slug: str
+
+    @classmethod
+    def from_object(cls, obj: model.Card):
+        return cls(id=obj.id, name=obj.name, image=obj.image, art_image=obj.art_image, slug=obj.slug)
 
 
 class DraftResponse(FromObjectModel):
+    id: int
+    date: datetime
+    front_card: CardResponse
+
     @classmethod
     def from_object(cls, obj: model.Draft):
-        # TODO
-        return cls()
+        return cls(front_card=CardResponse.from_object(obj.front_card), id=obj.id, date=obj.created_at)
 
 
 class DraftPlaythroughResponse(FromObjectModel):
+    player_id: int
+    cards: list[CardResponse]
+
     @classmethod
     def from_object(cls, obj: model.DraftRun):
-        # TODO
-        return cls()
+        return cls(
+            player_id=obj.player_id, cards=[CardResponse.from_object(p.picked_card) for p in obj.draft_picks]
+        )
 
 
 class DraftChoicesResponse(BaseModel):
+    cards: list[list[CardResponse]]
+
     @classmethod
     def from_list(cls, items: Collection[model.DraftOption]):
-        # TODO
-        pass
+        cards_per_turn = [[] for _ in range(8)]
+        for item in items:
+            cards_per_turn[item.turn_number].append(CardResponse.from_object(item.card))
+        return cls(cards=cards_per_turn)

@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, contains_eager
 from starlette.middleware.cors import CORSMiddleware
 
 from eightpack import model
@@ -43,7 +43,7 @@ app.add_middleware(
 
 @app.post("/users/register")
 def register(req: data.RegisterRequest, db: Session = Depends(database)):
-    if len(req.login) < 6:
+    if len(req.login) < 3:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="This username is too short!")
     if not LOGIN_CHARACTERS.match(req.login):
         raise HTTPException(
@@ -58,7 +58,7 @@ def register(req: data.RegisterRequest, db: Session = Depends(database)):
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST, detail="This username is already used!"
         ) from e
-    return data.UserTokenResponse.for_user(user)
+    return data.UserTokenResponse.from_object(user)
 
 
 @app.post("/users/login")
@@ -73,19 +73,27 @@ def login(req: data.LoginRequest, db: Session = Depends(database)):
         )
     if not validate_password(req.password, user.password):
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Incorrect password!")
-    return data.UserTokenResponse.for_user(user)
+    return data.UserTokenResponse.from_object(user)
 
 
 @app.get("/drafts")
 def get_drafts(pagination: data.PaginationRequest = Depends(), db: Session = Depends(database)):
-    query = pagination.convert(select(model.Draft), default_page_size=10)
+    query = pagination.convert(
+        select(model.Draft).join(model.Draft.front_card).options(contains_eager(model.Draft.front_card)),
+        default_page_size=10,
+    )
     result = db.execute(query)
     return data.PaginationResponse.from_result(result, data.DraftResponse)
 
 
 @app.get("/drafts/{draft_id}/choices")
 def get_draft_choices(draft_id: int, db: Session = Depends(database)):
-    query = select(model.DraftOption).where(model.DraftOption.draft_id == draft_id)
+    query = (
+        select(model.DraftOption)
+        .where(model.DraftOption.draft_id == draft_id)
+        .join(model.DraftOption.card)
+        .options(contains_eager(model.DraftOption.card))
+    )
     result = db.execute(query)
     return data.DraftChoicesResponse.from_list(result.scalars().all())
 
@@ -109,7 +117,12 @@ def get_draft_playthroughs(
     draft_id: int, pagination: data.PaginationRequest = Depends(), db: Session = Depends(database)
 ):
     query = pagination.convert(
-        select(model.DraftRun).where(model.DraftRun.draft.id == draft_id), default_page_size=10
+        select(model.DraftRun)
+        .where(model.DraftRun.draft.id == draft_id)
+        .join(model.DraftRun.draft_picks)
+        .join(model.DraftPick.picked_card)
+        .options(contains_eager(model.DraftRun.draft_picks).contains_eager(model.DraftPick.picked_card)),
+        default_page_size=10,
     )
     result = db.execute(query)
     return data.PaginationResponse.from_result(result, data.DraftPlaythroughResponse)
