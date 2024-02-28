@@ -15,7 +15,9 @@ class AppConfig(BaseSettings):
 
         if not self.DEBUG:
             sensitive_keys = ["JWT_KEY"]
-            bad_keys = [c for c in sensitive_keys if getattr(self, c, None) == getattr(self.__class__, c, None)]
+            bad_keys = [
+                c for c in sensitive_keys if getattr(self, c, None) == getattr(self.__class__, c, None)
+            ]
             if bad_keys:
                 raise ValueError(f"Keys have to be overridden (use EnvVars): {bad_keys}")
 

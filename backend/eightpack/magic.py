@@ -18,7 +18,7 @@ def fetch_cards(expansion: str) -> list[model.Card]:
     cards = []
     set_query = urlencode({"q": f"set:{expansion}"})
     for card in paginate_scryfall_get(ScryfallCard, f"/cards/search?{set_query}"):
-        cards.append(model.Card.from_scryfall_card(card))
+        cards.append(card.to_model())
     return cards
 
 
@@ -37,7 +37,7 @@ def fetch_the_list(names: list[str]) -> list[model.Card]:
             for set_name in SPECIAL_SETS
         ]
     ):
-        cards.append(model.Card.from_scryfall_card(card))
+        cards.append(card.to_model())
     return cards
 
 
