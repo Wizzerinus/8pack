@@ -8,9 +8,12 @@ class FormatData(BaseModel):
 
 
 class ScryfallImageURLs(BaseModel):
-    png: str
+    normal: str
+    art_crop: str
 
 
 class ScryfallCard(BaseModel):
     name: str
     image_uris: ScryfallImageURLs
+    rarity: str
+    set: str

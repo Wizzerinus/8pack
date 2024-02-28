@@ -27,8 +27,6 @@ def paginate_scryfall_post(t: type[T], url: str, json: dict) -> list[T]:
 
 
 def paginate(data: dict, items: list[T], t: type[T]) -> tuple[bool, str]:
-    if not_found := data.get("not_found"):
-        raise ValueError(f"Objects not found: {not_found}")
     for c in data["data"]:
         items.append(t(**c))
     has_more = data.get("has_more")

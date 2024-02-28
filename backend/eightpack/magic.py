@@ -1,9 +1,8 @@
 import csv
 import gzip
+import itertools
 from typing import IO
 from urllib.parse import urlencode
-
-import slugify
 
 from eightpack.core import EngineGlobal
 from eightpack.data import FormatData, ScryfallCard
@@ -12,13 +11,14 @@ from eightpack.util import paginate_scryfall_get, paginate_scryfall_post, remove
 
 # We're currently only supporting one format
 FORMAT = FormatData(name="Murders at Karlov Manor", set_code="MKM", picks_per_pack=13)
+SPECIAL_SETS = ["spg", "plst"]
 
 
 def fetch_cards(expansion: str) -> list[model.Card]:
     cards = []
     set_query = urlencode({"q": f"set:{expansion}"})
     for card in paginate_scryfall_get(ScryfallCard, f"/cards/search?{set_query}"):
-        cards.append(model.Card(name=card.name, slug=slugify.slugify(card.name), image=card.image_uris.png))
+        cards.append(model.Card.from_scryfall_card(card))
     return cards
 
 
@@ -27,10 +27,17 @@ def fetch_cards(expansion: str) -> list[model.Card]:
 def fetch_the_list(names: list[str]) -> list[model.Card]:
     assert len(names) <= 75, f"Didn't expect this many The List cards: {len(names)}"
     cards = []
-    for card in paginate_scryfall_post(
-        ScryfallCard, "/cards/collection", {"identifiers": [{"name": remove_face2(n)} for n in names]}
+    for card in itertools.chain.from_iterable(
+        [
+            paginate_scryfall_post(
+                ScryfallCard,
+                "/cards/collection",
+                {"identifiers": [{"name": remove_face2(n), "set": set_name} for n in names]},
+            )
+            for set_name in SPECIAL_SETS
+        ]
     ):
-        cards.append(model.Card(name=card.name, slug=slugify.slugify(card.name), image=card.image_uris.png))
+        cards.append(model.Card.from_scryfall_card(card))
     return cards
 
 
@@ -74,18 +81,21 @@ class DraftParser:
         row_cards = []
         picks = []
         for r in rows:
-            picks.append(r["pick"])
-            row_cards.append(self.get_cards_from_row(r))
+            picks.append(self.cards[r["pick"]])
+            row_cards.append([self.cards[c] for c in self.get_cards_from_row(r)])
+        front_card = next(
+            c for c in row_cards[0] if c.rarity in ("rare", "mythic") and c.set not in SPECIAL_SETS
+        )
 
         draft_options = []
         draft_picks = []
         for i, r in enumerate(row_cards):
             for j, c in enumerate(r):
-                draft_options.append(model.DraftOption(turn_number=i, option_number=j, card=self.cards[c]))
-            draft_picks.append(model.DraftPick(turn_number=i, picked_card=self.cards[picks[i]]))
+                draft_options.append(model.DraftOption(turn_number=i, option_number=j, card=c))
+            draft_picks.append(model.DraftPick(turn_number=i, picked_card=picks[i]))
 
         run = model.DraftRun(player=self.player, draft_picks=draft_picks)
-        return model.Draft(draft_options=draft_options, draft_runs=[run])
+        return model.Draft(draft_options=draft_options, draft_runs=[run], front_card=front_card)
 
     def parse_csv(self, contents: IO[str]) -> list[model.Draft]:
         # We're only extracting a small number of drafts from the CSV to not clog the database

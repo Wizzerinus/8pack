@@ -1,5 +1,8 @@
+from slugify import slugify
 from sqlalchemy import inspect, ForeignKey, String, DateTime, func, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from eightpack import data
 
 
 class Base(DeclarativeBase):
@@ -28,7 +31,7 @@ class DraftOption(Base):
     card_id: Mapped[int] = mapped_column(ForeignKey("cards.id"))
     card: Mapped["Card"] = relationship()
 
-    __table_args__ = (UniqueConstraint("turn_number", "option_number", "draft_id"), )
+    __table_args__ = (UniqueConstraint("turn_number", "option_number", "draft_id"),)
 
 
 class DraftRun(Base):
@@ -46,6 +49,8 @@ class Draft(Base):
     created_at: Mapped[int] = mapped_column(DateTime(), server_default=func.now(), onupdate=func.now())
     draft_runs: Mapped[list[DraftRun]] = relationship()
     draft_options: Mapped[list[DraftOption]] = relationship()
+    front_card_id: Mapped[int] = mapped_column(ForeignKey("cards.id"))
+    front_card: Mapped["Card"] = relationship()
 
 
 class Card(Base):
@@ -53,9 +58,24 @@ class Card(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
     image: Mapped[str] = mapped_column(String(255))
+    art_image: Mapped[str] = mapped_column(String(255))
     slug: Mapped[str] = mapped_column(String(50))
 
-    __table_args__ = (UniqueConstraint("slug"), )
+    rarity: Mapped[str] = mapped_column(String(8))
+    set: Mapped[str] = mapped_column(String(8))
+
+    __table_args__ = (UniqueConstraint("slug", "set"),)
+
+    @classmethod
+    def from_scryfall_card(cls, sc: data.ScryfallCard) -> "Card":
+        return cls(
+            name=sc.name,
+            image=sc.image_uris.normal,
+            art_image=sc.image_uris.art_crop,
+            slug=slugify(sc.name),
+            rarity=sc.rarity,
+            set=sc.set,
+        )
 
 
 class Player(Base):
