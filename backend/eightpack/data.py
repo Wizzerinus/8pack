@@ -4,7 +4,7 @@ from typing import TypeVar, Generic, Any, Collection
 
 from pydantic import BaseModel
 from slugify import slugify
-from sqlalchemy import Select, Result
+from sqlalchemy import Select, Result, func
 
 from eightpack import model
 from eightpack.util import sign_token
@@ -60,11 +60,13 @@ class LoginRequest(BaseModel):
 
 class PaginationRequest(BaseModel):
     page_num: int = 0
-    page_size: int = None
+    page_size: int | None = None
 
-    def convert(self, query: Select, *, default_page_size: int = 10, max_page_size: int = 50) -> Select:
-        # TODO
-        pass
+    def convert(self, query: Select, *, default_page_size: int = 10, max_page_size: int = 50) -> tuple[Select, Select]:
+        page_size = min(max_page_size, self.page_size or default_page_size)
+        slice_q = query.slice(page_size * self.page_num, page_size * (self.page_num + 1))
+        count_q = query.order_by(None).with_only_columns(func.count())
+        return slice_q, count_q
 
 
 class PaginationResponse(BaseModel, Generic[T]):
@@ -72,9 +74,8 @@ class PaginationResponse(BaseModel, Generic[T]):
     data: list[T]
 
     @classmethod
-    def from_result(cls, result: Result, t: type[T]) -> "PaginationResponse[T]":
-        # TODO
-        pass
+    def from_result(cls, result: Result, count: int, t: type[T]) -> "PaginationResponse[T]":
+        return PaginationResponse(total_objects=count, data=[t.from_object(o) for o in result.scalars().all()])
 
 
 class DraftPlaythroughRequest(BaseModel):

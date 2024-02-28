@@ -4,7 +4,7 @@ from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, contains_eager
 from starlette.middleware.cors import CORSMiddleware
@@ -78,12 +78,15 @@ def login(req: data.LoginRequest, db: Session = Depends(database)):
 
 @app.get("/drafts")
 def get_drafts(pagination: data.PaginationRequest = Depends(), db: Session = Depends(database)):
-    query = pagination.convert(
-        select(model.Draft).join(model.Draft.front_card).options(contains_eager(model.Draft.front_card)),
+    slice_query, count_query = pagination.convert(
+        select(model.Draft)
+        .join(model.Draft.front_card)
+        .options(contains_eager(model.Draft.front_card))
+        .order_by(-model.Draft.id),
         default_page_size=10,
     )
-    result = db.execute(query)
-    return data.PaginationResponse.from_result(result, data.DraftResponse)
+    slice_result, count = db.execute(slice_query), db.execute(count_query).scalar()
+    return data.PaginationResponse.from_result(slice_result, count, data.DraftResponse)
 
 
 @app.get("/drafts/{draft_id}/choices")
@@ -116,16 +119,19 @@ def save_draft_playthrough(
 def get_draft_playthroughs(
     draft_id: int, pagination: data.PaginationRequest = Depends(), db: Session = Depends(database)
 ):
-    query = pagination.convert(
+    # Due to COUNT DISTINCT we paginate manually
+    slice_query = (
         select(model.DraftRun)
-        .where(model.DraftRun.draft.id == draft_id)
-        .join(model.DraftRun.draft_picks)
-        .join(model.DraftPick.picked_card)
-        .options(contains_eager(model.DraftRun.draft_picks).contains_eager(model.DraftPick.picked_card)),
-        default_page_size=10,
+        .where(model.DraftRun.draft_id == draft_id)
+        .join(model.DraftPick)
+        .join(model.Card)
+        .order_by(model.DraftRun.id.desc())
+        .distinct()
     )
-    result = db.execute(query)
-    return data.PaginationResponse.from_result(result, data.DraftPlaythroughResponse)
+    count_query = select(model.DraftRun).where(model.DraftRun.draft_id == draft_id).with_only_columns(func.count())
+
+    slice_result, count = db.execute(slice_query), db.execute(count_query).scalar()
+    return data.PaginationResponse.from_result(slice_result, count, data.DraftPlaythroughResponse)
 
 
 if __name__ == "__main__":
