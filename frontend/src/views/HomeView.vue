@@ -1,6 +1,5 @@
 <template>
-    <h3>Recent drafts</h3>
-    <Pagination :subcomponent="Draft" url="drafts" />
+    <Pagination :subcomponent="Draft" url="drafts" name="Recent drafts" />
 </template>
 
 <script>
