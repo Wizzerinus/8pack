@@ -12,6 +12,8 @@ from eightpack.util import paginate_scryfall_get, paginate_scryfall_post, remove
 # We're currently only supporting one format
 FORMAT = FormatData(name="Murders at Karlov Manor", set_code="MKM", picks_per_pack=13)
 SPECIAL_SETS = ["spg", "plst"]
+# don't show these card layouts on front page because they have a stupid art crop
+BAD_LAYOUTS = ["split", "flip", "class", "case", "saga", "battle"]
 
 
 def fetch_cards(expansion: str) -> list[model.Card]:
@@ -83,8 +85,12 @@ class DraftParser:
         for r in rows:
             picks.append(self.cards[r["pick"]])
             row_cards.append([self.cards[c] for c in self.get_cards_from_row(r)])
-        front_card = next(
-            c for c in row_cards[0] if c.rarity in ("rare", "mythic") and c.set not in SPECIAL_SETS
+        front_card = max(
+            [c for c in row_cards[0] if c.layout not in BAD_LAYOUTS],
+            key=lambda c: (
+                ["common", "uncommon", "rare", "mythic"].index(c.rarity),
+                c.set not in SPECIAL_SETS,
+            ),
         )
 
         draft_options = []

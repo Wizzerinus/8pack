@@ -36,6 +36,7 @@ class ScryfallCard(BaseModel):
     image_uris: ScryfallImageURLs
     rarity: str
     set: str
+    layout: str
 
     def to_model(self) -> model.Card:
         return model.Card(
@@ -44,6 +45,7 @@ class ScryfallCard(BaseModel):
             art_image=self.image_uris.art_crop,
             slug=slugify(self.name),
             rarity=self.rarity,
+            layout=self.layout,
             set=self.set,
         )
 
@@ -62,7 +64,9 @@ class PaginationRequest(BaseModel):
     page_num: int = 0
     page_size: int | None = None
 
-    def convert(self, query: Select, *, default_page_size: int = 10, max_page_size: int = 50) -> tuple[Select, Select]:
+    def convert(
+        self, query: Select, *, default_page_size: int = 10, max_page_size: int = 50
+    ) -> tuple[Select, Select]:
         page_size = min(max_page_size, self.page_size or default_page_size)
         slice_q = query.slice(page_size * self.page_num, page_size * (self.page_num + 1))
         count_q = query.order_by(None).with_only_columns(func.count())
@@ -75,7 +79,9 @@ class PaginationResponse(BaseModel, Generic[T]):
 
     @classmethod
     def from_result(cls, result: Result, count: int, t: type[T]) -> "PaginationResponse[T]":
-        return PaginationResponse(total_objects=count, data=[t.from_object(o) for o in result.scalars().all()])
+        return PaginationResponse(
+            total_objects=count, data=[t.from_object(o) for o in result.scalars().all()]
+        )
 
 
 class DraftPlaythroughRequest(BaseModel):
@@ -120,10 +126,16 @@ class DraftResponse(FromObjectModel):
     id: int
     date: datetime
     front_card: CardResponse
+    run_count: int
 
     @classmethod
     def from_object(cls, obj: model.Draft):
-        return cls(front_card=CardResponse.from_object(obj.front_card), id=obj.id, date=obj.created_at)
+        return cls(
+            front_card=CardResponse.from_object(obj.front_card),
+            id=obj.id,
+            date=obj.created_at,
+            run_count=obj.run_count,
+        )
 
 
 class DraftPlaythroughResponse(FromObjectModel):

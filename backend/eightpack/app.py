@@ -88,7 +88,7 @@ def get_drafts(pagination: data.PaginationRequest = Depends(), db: Session = Dep
         .join(model.Draft.front_card)
         .options(contains_eager(model.Draft.front_card))
         .order_by(-model.Draft.id),
-        default_page_size=10,
+        default_page_size=12,
     )
     slice_result, count = db.execute(slice_query), db.execute(count_query).scalar()
     return data.PaginationResponse.from_result(slice_result, count, data.DraftResponse)
@@ -131,7 +131,9 @@ def get_draft_playthroughs(draft_id: int, db: Session = Depends(database)):
         .order_by(model.DraftRun.id.desc())
         .distinct()
     )
-    count_query = select(model.DraftRun).where(model.DraftRun.draft_id == draft_id).with_only_columns(func.count())
+    count_query = (
+        select(model.DraftRun).where(model.DraftRun.draft_id == draft_id).with_only_columns(func.count())
+    )
 
     slice_result, count = db.execute(slice_query), db.execute(count_query).scalar()
     return data.PaginationResponse.from_result(slice_result, count, data.DraftPlaythroughResponse)

@@ -26,6 +26,7 @@ export const useAuthStore = defineStore("auth", () => {
             store.clear_alert()
             return e
         }
+        token.value = ""
         store.set_alert(e.detail)
         return Promise.reject("already failed")
     }

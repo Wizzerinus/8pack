@@ -1,5 +1,6 @@
-from sqlalchemy import inspect, ForeignKey, String, DateTime, func, UniqueConstraint
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import inspect, ForeignKey, String, DateTime, func, UniqueConstraint, select
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, column_property
 
 
 class Base(DeclarativeBase):
@@ -50,6 +51,10 @@ class Draft(Base):
     front_card_id: Mapped[int] = mapped_column(ForeignKey("cards.id"))
     front_card: Mapped["Card"] = relationship()
 
+    run_count: Mapped[int] = column_property(
+        select(func.count()).where(DraftRun.draft_id == id).scalar_subquery()
+    )
+
 
 class Card(Base):
     __tablename__ = "cards"
@@ -58,6 +63,7 @@ class Card(Base):
     image: Mapped[str] = mapped_column(String(255))
     art_image: Mapped[str] = mapped_column(String(255))
     slug: Mapped[str] = mapped_column(String(50))
+    layout: Mapped[str] = mapped_column(String(24))
 
     rarity: Mapped[str] = mapped_column(String(8))
     set: Mapped[str] = mapped_column(String(8))
