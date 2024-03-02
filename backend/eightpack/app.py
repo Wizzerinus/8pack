@@ -76,6 +76,11 @@ def login(req: data.LoginRequest, db: Session = Depends(database)):
     return data.UserTokenResponse.from_object(user)
 
 
+@app.post("/users/token")
+def get_token_info(user: model.Player = Depends(default_get_user)):
+    return data.UserInformation.from_object(user)
+
+
 @app.get("/drafts")
 def get_drafts(pagination: data.PaginationRequest = Depends(), db: Session = Depends(database)):
     slice_query, count_query = pagination.convert(
@@ -116,9 +121,7 @@ def save_draft_playthrough(
 
 
 @app.get("/drafts/{draft_id}/playthroughs")
-def get_draft_playthroughs(
-    draft_id: int, pagination: data.PaginationRequest = Depends(), db: Session = Depends(database)
-):
+def get_draft_playthroughs(draft_id: int, db: Session = Depends(database)):
     # Due to COUNT DISTINCT we paginate manually
     slice_query = (
         select(model.DraftRun)

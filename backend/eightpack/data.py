@@ -96,6 +96,14 @@ class UserTokenResponse(BaseModel):
         return cls(token=sign_token(user, timedelta(days=14)))
 
 
+class UserInformation(BaseModel):
+    login: str
+
+    @classmethod
+    def from_object(cls, user: model.Player) -> "UserInformation":
+        return cls(login=user.login)
+
+
 class CardResponse(BaseModel):
     id: int
     name: str
