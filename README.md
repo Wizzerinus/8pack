@@ -20,11 +20,19 @@ python -m eightpack.cli dev-db
 # In a different terminal window:
 python -m eightpack.cli import-drafts
 python -m eightpack.app  # this starts the webserver, default port 8003
+# if you change the port make sure to change the backend URL on the frontend
 ```
 
 ### Frontend
 
-(WIP)
+Most functionality requires a running backend.
+
+```shell
+cd frontend
+npm install
+npm run dev  # this starts the webserver, default port 5173
+# if you change the port make sure to change the CORS header sent by the backend
+```
 
 ## Production setup
 
