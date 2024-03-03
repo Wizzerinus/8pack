@@ -9,7 +9,7 @@ export const useAuthStore = defineStore("auth", () => {
 
     const user_data = ref(null)
     const load = () => {
-        if (token.value === "" || user_data.value !== null) return
+        if (!token.value || user_data.value !== null) return
         post("users/token", {}, token.value)
             .then((e) => e.json())
             .then(_process_error)
