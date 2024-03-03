@@ -157,7 +157,7 @@ class DraftPlaythroughResponse(FromObjectModel):
             player_name=obj.player.name,
             created_at=obj.created_at,
             is_og=obj.is_original,
-            cards=[CardResponse.from_object(p.picked_card) for p in obj.draft_picks]
+            cards=[CardResponse.from_object(p.picked_card) for p in obj.draft_picks],
         )
 
 

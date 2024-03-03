@@ -5,8 +5,12 @@
 
         <div v-for="play in playthroughs" class="mt-4">
             <span>By {{ play.player_name }}, at {{ humanize_date(play.created_at) }}</span>
-            <span class="italic text-neutral-700 block" v-if="play.player_id === our_player_id">Your playthrough</span>
-            <span class="italic text-neutral-700 block" v-if="play.is_og">Original playthrough</span>
+            <span class="italic text-neutral-700 block" v-if="play.player_id === our_player_id"
+                >Your playthrough</span
+            >
+            <span class="italic text-neutral-700 block" v-if="play.is_og"
+                >Original playthrough</span
+            >
             <button v-else class="btn btn-sm block mb-1 btn-neutral" @click="compare(play)">
                 Compare with the original run
             </button>
@@ -19,15 +23,15 @@
     </div>
 </template>
 <script>
-import {useDraftStore} from "@/stores/draft.js";
-import {computed, watch} from "vue";
-import {storeToRefs} from "pinia";
-import {humanize_date} from "../util.js";
-import {useAuthStore} from "@/stores/auth.js";
-import {useRouter} from "vue-router";
+import { useDraftStore } from "@/stores/draft.js"
+import { computed, watch } from "vue"
+import { storeToRefs } from "pinia"
+import { humanize_date } from "../util.js"
+import { useAuthStore } from "@/stores/auth.js"
+import { useRouter } from "vue-router"
 
 export default {
-    methods: {humanize_date},
+    methods: { humanize_date },
     props: ["draft_id"],
     setup(props) {
         const draftStore = useDraftStore()
@@ -37,9 +41,9 @@ export default {
 
         const { current_draft_plays: playthroughs } = storeToRefs(draftStore)
         const { user_data } = storeToRefs(authStore)
-        const our_player_id = computed(() => user_data.value ? user_data.value.id : -1)
-        const compare = play => router.push(`/drafts/${props.draft_id}/compare/${play.id}`)
+        const our_player_id = computed(() => (user_data.value ? user_data.value.id : -1))
+        const compare = (play) => router.push(`/drafts/${props.draft_id}/compare/${play.id}`)
         return { playthroughs, our_player_id, compare }
-    }
+    },
 }
 </script>

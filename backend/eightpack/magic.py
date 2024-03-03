@@ -134,7 +134,9 @@ class DraftParser:
 
         run = model.DraftRun(player=self.player, draft_picks=draft_picks, is_original=True)
         return DraftParseResponse(
-            item=model.Draft(draft_options=draft_options, draft_runs=[run], front_card=front_card, first_player=self.player)
+            item=model.Draft(
+                draft_options=draft_options, draft_runs=[run], front_card=front_card, first_player=self.player
+            )
         )
 
     def parse_csv(self, contents: IO[str]) -> list[model.Draft]:

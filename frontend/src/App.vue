@@ -16,10 +16,10 @@
     </main>
 </template>
 <script>
-import NavbarLogin from "@/components/NavbarLogin.vue";
-import AlertThing from "@/components/AlertThing.vue";
+import NavbarLogin from "@/components/NavbarLogin.vue"
+import AlertThing from "@/components/AlertThing.vue"
 
 export default {
-    components: {AlertThing, NavbarLogin}
+    components: { AlertThing, NavbarLogin },
 }
 </script>

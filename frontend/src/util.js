@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/stores/auth.js"
-import { DateTime } from 'luxon'
+import { DateTime } from "luxon"
 
 const BACKEND_URL = "http://localhost:8003"
 

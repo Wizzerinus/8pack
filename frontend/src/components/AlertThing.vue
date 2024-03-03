@@ -7,12 +7,12 @@
     </div>
 </template>
 <script>
-import {useAlertStore} from "@/stores/alert.js";
-import {storeToRefs} from "pinia";
-import SvgClose from "@/components/svg/SvgClose.vue";
+import { useAlertStore } from "@/stores/alert.js"
+import { storeToRefs } from "pinia"
+import SvgClose from "@/components/svg/SvgClose.vue"
 
 export default {
-    components: {SvgClose},
+    components: { SvgClose },
     setup() {
         const alertStore = useAlertStore()
 

@@ -1,5 +1,5 @@
-import {defineStore} from "pinia";
-import {ref} from "vue";
+import { defineStore } from "pinia"
+import { ref } from "vue"
 
 export const useAlertStore = defineStore("alert", () => {
     const alert = ref("")
@@ -10,6 +10,6 @@ export const useAlertStore = defineStore("alert", () => {
         alert_type.value = type
     }
 
-    const clear_alert = () => alert.value = ""
+    const clear_alert = () => (alert.value = "")
     return { alert, alert_type, set_alert, clear_alert }
 })

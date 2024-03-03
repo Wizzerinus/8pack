@@ -3,15 +3,15 @@
 </template>
 
 <script>
-import Pagination from "@/components/Pagination.vue";
-import Draft from "@/components/Draft.vue";
+import Pagination from "@/components/Pagination.vue"
+import Draft from "@/components/Draft.vue"
 
 export default {
     computed: {
         Draft() {
             return Draft
-        }
+        },
     },
-    components: {Pagination}
+    components: { Pagination },
 }
 </script>
