@@ -100,8 +100,8 @@ class DraftParser:
                 draft_options.append(model.DraftOption(turn_number=i, option_number=j, card=c))
             draft_picks.append(model.DraftPick(turn_number=i, picked_card=picks[i]))
 
-        run = model.DraftRun(player=self.player, draft_picks=draft_picks)
-        return model.Draft(draft_options=draft_options, draft_runs=[run], front_card=front_card)
+        run = model.DraftRun(player=self.player, draft_picks=draft_picks, is_original=True)
+        return model.Draft(draft_options=draft_options, draft_runs=[run], front_card=front_card, first_player=self.player)
 
     def parse_csv(self, contents: IO[str]) -> list[model.Draft]:
         # We're only extracting a small number of drafts from the CSV to not clog the database
@@ -132,7 +132,7 @@ class DraftParser:
 def do_imports(db_url: str, lands_file_name: str):
     EngineGlobal.setup(db_url)
     db = EngineGlobal.DBConnection()
-    user = model.Player(login="$17lands", password="", virtual=True)
+    user = model.Player(login="$17lands", name="a 17lands user", password="", virtual=True)
     cards = fetch_cards(FORMAT.set_code.lower())
     drafts = DraftParser.parse_gzip(lands_file_name, user, cards)  # also includes The List cards
 

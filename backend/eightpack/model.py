@@ -40,6 +40,8 @@ class DraftRun(Base):
     player: Mapped["Player"] = relationship()
     draft_picks: Mapped[list[DraftPick]] = relationship()
     draft: Mapped["Draft"] = relationship(back_populates="draft_runs")
+    created_at: Mapped[int] = mapped_column(DateTime(), server_default=func.now(), onupdate=func.now())
+    is_original: Mapped[bool] = mapped_column(default=False)
 
 
 class Draft(Base):
@@ -50,6 +52,8 @@ class Draft(Base):
     draft_options: Mapped[list[DraftOption]] = relationship()
     front_card_id: Mapped[int] = mapped_column(ForeignKey("cards.id"))
     front_card: Mapped["Card"] = relationship()
+    first_player_id: Mapped[int] = mapped_column(ForeignKey("players.id"))
+    first_player: Mapped["Player"] = relationship()
 
     run_count: Mapped[int] = column_property(
         select(func.count()).where(DraftRun.draft_id == id).scalar_subquery()
@@ -75,6 +79,7 @@ class Player(Base):
     __tablename__ = "players"
     id: Mapped[int] = mapped_column(primary_key=True)
     login: Mapped[str] = mapped_column(String(64))
+    name: Mapped[str] = mapped_column(String(64))
     password: Mapped[str] = mapped_column(String(256))
     virtual: Mapped[bool] = mapped_column(default=False)
 

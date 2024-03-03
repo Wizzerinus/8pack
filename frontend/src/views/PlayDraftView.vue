@@ -11,7 +11,7 @@
             <div v-else>
                 <button class="btn btn-primary block" v-if="logged_in" @click="save">Save results</button>
                 <span v-else class="block">Log in or register to save this draft!</span>
-                <button class="btn block mt-4" @click="view">View results without saving</button>
+                <button class="btn block mt-4" @click="reset_and_view">View results without saving</button>
             </div>
         </div>
         <div>
@@ -37,6 +37,7 @@ export default {
     setup(props) {
         const draftStore = useDraftStore()
         const authStore = useAuthStore()
+        const router = useRouter()
         watch(() => props.draft_id, draftStore.load, { immediate: true })
 
         const { logged_in } = storeToRefs(authStore)
@@ -49,12 +50,15 @@ export default {
                 .then(() => draftStore.reload())
                 .then(view)
         }
+        const reset_and_view = () => {
+            draftStore.reload()
+            view()
+        }
         const view = () => {
-            const router = useRouter()
             router.push(`/drafts/${props.draft_id}/results`)
         }
 
-        return { current_draft_choices, current_picks, cards, pick, logged_in, save, view }
+        return { current_draft_choices, current_picks, cards, pick, logged_in, save, reset_and_view }
     }
 }
 </script>

@@ -50,7 +50,7 @@ def register(req: data.RegisterRequest, db: Session = Depends(database)):
             status_code=HTTPStatus.BAD_REQUEST, detail="This username contains invalid characters!"
         )
 
-    user = model.Player(login=req.login, password=encrypt_password(req.password))
+    user = model.Player(login=req.login, name=req.login, password=encrypt_password(req.password))
     db.add(user)
     try:
         db.commit()
@@ -86,6 +86,7 @@ def get_drafts(pagination: data.PaginationRequest = Depends(), db: Session = Dep
     slice_query, count_query = pagination.convert(
         select(model.Draft)
         .join(model.Draft.front_card)
+        .join(model.Draft.first_player)
         .options(contains_eager(model.Draft.front_card))
         .order_by(-model.Draft.id),
         default_page_size=12,

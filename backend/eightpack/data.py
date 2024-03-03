@@ -104,10 +104,11 @@ class UserTokenResponse(BaseModel):
 
 class UserInformation(BaseModel):
     login: str
+    id: int
 
     @classmethod
     def from_object(cls, user: model.Player) -> "UserInformation":
-        return cls(login=user.login)
+        return cls(login=user.name, id=user.id)
 
 
 class CardResponse(BaseModel):
@@ -127,6 +128,7 @@ class DraftResponse(FromObjectModel):
     date: datetime
     front_card: CardResponse
     run_count: int
+    player_name: str
 
     @classmethod
     def from_object(cls, obj: model.Draft):
@@ -135,19 +137,24 @@ class DraftResponse(FromObjectModel):
             id=obj.id,
             date=obj.created_at,
             run_count=obj.run_count,
+            player_name=obj.first_player.name,
         )
 
 
 class DraftPlaythroughResponse(FromObjectModel):
     player_id: int
     player_name: str
+    created_at: datetime
+    is_og: bool
     cards: list[CardResponse]
 
     @classmethod
     def from_object(cls, obj: model.DraftRun):
         return cls(
             player_id=obj.player_id,
-            player_name=obj.player.login,
+            player_name=obj.player.name,
+            created_at=obj.created_at,
+            is_og=obj.is_original,
             cards=[CardResponse.from_object(p.picked_card) for p in obj.draft_picks]
         )
 

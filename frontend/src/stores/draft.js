@@ -25,5 +25,5 @@ export const useDraftStore = defineStore("draft", () => {
         reload()
     }
 
-    return { load, reload, current_draft_choices, current_draft_id, current_picks }
+    return { load, reload, current_draft_choices, current_draft_id, current_picks, current_draft_plays }
 })

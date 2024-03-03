@@ -1,15 +1,40 @@
 <template>
-    Draft results
+    <div>
+        <h2>Draft #{{ draft_id }}</h2>
+        <RouterLink :to="'/drafts/' + draft_id" class="btn btn-primary">Try this draft</RouterLink>
+
+        <div v-for="play in playthroughs" class="mt-4">
+            <span>By {{ play.player_name }}, at {{ humanize_date(play.created_at) }}</span>
+            <span class="italic text-neutral-700 block" v-if="play.player_id === our_player_id">Your playthrough</span>
+            <span class="italic text-neutral-700 block" v-if="play.is_og">Original playthrough</span>
+            <button v-else class="btn btn-sm block mb-1 btn-neutral">Compare with the original run</button>
+            <div class="flex gap-2 mt-1">
+                <div v-for="card in play.cards">
+                    <img :src="card.image" :alt="card.name" :title="card.name" class="rounded" />
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 <script>
 import {useDraftStore} from "@/stores/draft.js";
-import {watch} from "vue";
+import {computed, watch} from "vue";
+import {storeToRefs} from "pinia";
+import {humanize_date} from "../util.js";
+import {useAuthStore} from "@/stores/auth.js";
 
 export default {
+    methods: {humanize_date},
     props: ["draft_id"],
     setup(props) {
         const draftStore = useDraftStore()
+        const authStore = useAuthStore()
         watch(() => props.draft_id, draftStore.load, { immediate: true })
+
+        const { current_draft_plays: playthroughs } = storeToRefs(draftStore)
+        const { user_data } = storeToRefs(authStore)
+        const our_player_id = computed(() => user_data.value ? user_data.value.id : -1)
+        return { playthroughs, our_player_id }
     }
 }
 </script>
