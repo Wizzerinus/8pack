@@ -19,12 +19,15 @@
                         class="absolute -z-10 top-0 left-0 right-0 rounded-b bg-white pointer-events-none"
                         :style="{ height: `${100 - get_weight(idx, card)}%` }"
                     ></div>
-                    <img
-                        :src="card.image"
-                        :alt="card.name"
-                        :title="`${card.name} - picked by ${get_weight(idx, card)}% players`"
-                        class="rounded"
-                    />
+                    <div class="flex flex-col items-center">
+                        <img
+                            :src="card.image"
+                            :alt="card.name"
+                            :title="`${card.name} - picked by ${get_weight(idx, card)}% players`"
+                            class="rounded"
+                        />
+                        <span>{{ get_weight(idx, card) }}% players</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -40,7 +43,7 @@
 .scale-background {
     background: linear-gradient(
         0deg,
-        rgba(187, 0, 0, 1) 0%,
+        rgba(227, 40, 40, 1) 0%,
         rgba(255, 255, 0, 1) 44%,
         rgba(255, 255, 0, 1) 56%,
         rgba(22, 172, 0, 1) 100%
