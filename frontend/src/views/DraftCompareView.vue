@@ -67,7 +67,11 @@ export default {
     setup(props) {
         const draftStore = useDraftStore()
         watch(() => props.draft_id, draftStore.load, { immediate: true })
-        const { current_draft_plays: plays, current_draft_choices: picks, loading_count } = storeToRefs(draftStore)
+        const {
+            current_draft_plays: plays,
+            current_draft_choices: picks,
+            loading_count,
+        } = storeToRefs(draftStore)
 
         const og_run = computed(() => {
             for (const i of plays.value) if (i.is_og) return i

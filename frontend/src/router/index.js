@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/auth.js"
 import PlayDraftView from "@/views/PlayDraftView.vue"
 import DraftResultsView from "@/views/DraftResultsView.vue"
 import DraftCompareView from "@/views/DraftCompareView.vue"
+import DraftStatisticsView from "@/views/DraftStatisticsView.vue"
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,12 @@ const router = createRouter({
             path: "/drafts/:draft_id/compare/:run_id",
             name: "draft-compare",
             component: DraftCompareView,
+            props: true,
+        },
+        {
+            path: "/drafts/:draft_id/statistics",
+            name: "draft-statistics",
+            component: DraftStatisticsView,
             props: true,
         },
     ],

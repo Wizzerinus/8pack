@@ -1,7 +1,12 @@
 <template>
     <div>
         <h2>Draft #{{ draft_id }}</h2>
-        <RouterLink :to="'/drafts/' + draft_id" class="btn btn-primary">Try this draft</RouterLink>
+        <RouterLink :to="`/drafts/${draft_id}`" class="btn btn-primary me-4">
+            Try this draft
+        </RouterLink>
+        <RouterLink :to="`/drafts/${draft_id}/statistics`" class="btn btn-accent">
+            Draft Statistics
+        </RouterLink>
 
         <template v-if="!loading_count">
             <div v-for="play in playthroughs" class="mt-4">
@@ -17,7 +22,12 @@
                 </button>
                 <div class="flex gap-2 mt-1">
                     <div v-for="card in play.cards">
-                        <img :src="card.image" :alt="card.name" :title="card.name" class="rounded" />
+                        <img
+                            :src="card.image"
+                            :alt="card.name"
+                            :title="card.name"
+                            class="rounded"
+                        />
                     </div>
                 </div>
             </div>
