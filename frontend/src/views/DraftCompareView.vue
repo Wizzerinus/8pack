@@ -9,7 +9,7 @@
             <div class="badge badge-lg" style="background-color: green;border-color:green"></div> Picked by both players
         </div>
         <div class="flex items-center gap-2">
-            <div class="badge badge-lg" style="background-color: yellow;border-color:yellow"></div> Picked by the original player
+            <div class="badge badge-lg" style="background-color: orange;border-color:orange"></div> Picked by the original player
         </div>
         <div class="flex items-center gap-2">
             <div class="badge badge-lg" style="background-color: blue;border-color:blue"></div> Picked by the compared player
@@ -37,7 +37,7 @@
     box-sizing: border-box;
 }
 .picked-by-og {
-    border: 4px solid yellow;
+    border: 4px solid orange;
     box-sizing: border-box;
 }
 </style>
