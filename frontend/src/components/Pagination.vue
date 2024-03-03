@@ -1,7 +1,7 @@
 <template>
     <div class="flex items-center mt-4 ms-7">
         <h3 class="me-8">{{ name }}</h3>
-        <div class="join">
+        <div class="join" v-if="!loading">
             <button
                 v-for="index in total_pages"
                 class="join-item btn"
@@ -13,9 +13,10 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 m-4">
+    <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 m-4" v-if="!loading">
         <component :is="subcomponent" v-for="item in items" :item="item"></component>
     </div>
+    <span v-else class="loading loading-spinner loading-lg"></span>
 </template>
 
 <script>
@@ -26,6 +27,7 @@ export default {
     props: ["subcomponent", "url", "name"],
     setup(props) {
         const items = ref([])
+        const loading = ref(true)
         const total_objects = ref(0)
         const total_pages = ref(0)
         const current_page = ref(0)
@@ -39,6 +41,7 @@ export default {
                     if (set_total_pages)
                         total_pages.value =
                             e.data.length > 0 ? Math.ceil(e.total_objects / e.data.length) : 1
+                    loading.value = false
                 })
         }
         loadPage(true)

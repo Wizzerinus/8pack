@@ -18,9 +18,9 @@
         <button type="button" class="btn btn-sm" @click="do_register">Register</button>
     </div>
     <div v-else>
-        <span class="me-3"
-            >Logged in as <code>{{ user_login }}</code></span
-        >
+        <span class="me-3">
+            Logged in as <code>{{ user_login }}</code>
+        </span>
         <button type="button" class="btn btn-sm" @click="do_logout">Logout</button>
     </div>
 </template>

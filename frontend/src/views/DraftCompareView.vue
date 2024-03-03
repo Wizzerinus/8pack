@@ -1,12 +1,12 @@
 <template>
     <h2 class="mb-3">Compare runs of draft {{ draft_id }}</h2>
     <div class="mb-3">
-        <RouterLink :to="`/drafts/${draft_id}`" class="btn btn-primary me-4"
-            >Play this draft</RouterLink
-        >
-        <RouterLink :to="`/drafts/${draft_id}/results`" class="btn btn-accent"
-            >See all results</RouterLink
-        >
+        <RouterLink :to="`/drafts/${draft_id}`" class="btn btn-primary me-4">
+            Play this draft
+        </RouterLink>
+        <RouterLink :to="`/drafts/${draft_id}/results`" class="btn btn-accent">
+            See all results
+        </RouterLink>
     </div>
     <div class="mb-3 flex flex-col gap-1">
         <div class="flex items-center gap-2">
@@ -25,7 +25,7 @@
             Picked by the compared player
         </div>
     </div>
-    <div>
+    <div v-if="!loading_count">
         <div class="flex flex-col" v-for="(cards, idx) in picks">
             <h3 class="mb-1">Pack 1, pick {{ idx + 1 }}</h3>
             <div class="flex flex-wrap items-center gap-2 mb-3">
@@ -41,6 +41,7 @@
             </div>
         </div>
     </div>
+    <span v-else class="loading loading-spinner loading-lg"></span>
 </template>
 <style scoped>
 .picked-by-both {
@@ -66,7 +67,7 @@ export default {
     setup(props) {
         const draftStore = useDraftStore()
         watch(() => props.draft_id, draftStore.load, { immediate: true })
-        const { current_draft_plays: plays, current_draft_choices: picks } = storeToRefs(draftStore)
+        const { current_draft_plays: plays, current_draft_choices: picks, loading_count } = storeToRefs(draftStore)
 
         const og_run = computed(() => {
             for (const i of plays.value) if (i.is_og) return i
@@ -83,7 +84,7 @@ export default {
             else if (they_picked) return "picked-by-og"
         }
 
-        return { og_run, compared_run, picks, get_border }
+        return { og_run, compared_run, picks, get_border, loading_count }
     },
 }
 </script>

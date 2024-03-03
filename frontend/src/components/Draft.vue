@@ -13,9 +13,9 @@
             <p>Played {{ item.run_count }} time{{ get_s(item.run_count) }}</p>
             <div class="card-actions justify-end">
                 <RouterLink :to="`/drafts/${item.id}`" class="btn btn-primary">Play now</RouterLink>
-                <RouterLink :to="`/drafts/${item.id}/results`" class="btn btn-accent"
-                    >See results</RouterLink
-                >
+                <RouterLink :to="`/drafts/${item.id}/results`" class="btn btn-accent">
+                    See results
+                </RouterLink>
             </div>
         </div>
     </div>

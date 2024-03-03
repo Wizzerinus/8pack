@@ -28,11 +28,6 @@ export function post(url, body = {}, token = null, headers = {}) {
     })
 }
 
-export function auth_get(url, headers = {}) {
-    const auth = useAuthStore()
-    return get(url, auth.token, headers)
-}
-
 export function auth_post(url, body = {}, headers = {}) {
     const auth = useAuthStore()
     return post(url, body, auth.token, headers)
