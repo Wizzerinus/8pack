@@ -140,13 +140,24 @@ class DraftResponse(FromObjectModel):
 
 class DraftPlaythroughResponse(FromObjectModel):
     player_id: int
+    player_name: str
     cards: list[CardResponse]
 
     @classmethod
     def from_object(cls, obj: model.DraftRun):
         return cls(
-            player_id=obj.player_id, cards=[CardResponse.from_object(p.picked_card) for p in obj.draft_picks]
+            player_id=obj.player_id,
+            player_name=obj.player.login,
+            cards=[CardResponse.from_object(p.picked_card) for p in obj.draft_picks]
         )
+
+
+class ManyDraftPlaythroughsResponse(BaseModel):
+    playthroughs: list[DraftPlaythroughResponse]
+
+    @classmethod
+    def from_list(cls, items: Collection[model.DraftRun]):
+        return cls(playthroughs=[DraftPlaythroughResponse.from_object(obj) for obj in items])
 
 
 class DraftChoicesResponse(BaseModel):

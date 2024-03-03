@@ -114,7 +114,7 @@ def save_draft_playthrough(
     user: model.Player = Depends(default_get_user),
 ):
     picks = [model.DraftPick(turn_number=i, picked_card_id=card) for i, card in enumerate(choices.picks)]
-    run = model.DraftRun(player=user, picks=picks, draft_id=draft_id)
+    run = model.DraftRun(player=user, draft_picks=picks, draft_id=draft_id)
     db.add(run)
     db.commit()
     return data.SuccessResponse()
@@ -122,21 +122,18 @@ def save_draft_playthrough(
 
 @app.get("/drafts/{draft_id}/playthroughs")
 def get_draft_playthroughs(draft_id: int, db: Session = Depends(database)):
-    # Due to COUNT DISTINCT we paginate manually
-    slice_query = (
+    query = (
         select(model.DraftRun)
         .where(model.DraftRun.draft_id == draft_id)
         .join(model.DraftPick)
         .join(model.Card)
+        .join(model.Player)
         .order_by(model.DraftRun.id.desc())
         .distinct()
     )
-    count_query = (
-        select(model.DraftRun).where(model.DraftRun.draft_id == draft_id).with_only_columns(func.count())
-    )
 
-    slice_result, count = db.execute(slice_query), db.execute(count_query).scalar()
-    return data.PaginationResponse.from_result(slice_result, count, data.DraftPlaythroughResponse)
+    result = db.execute(query)
+    return data.ManyDraftPlaythroughsResponse.from_list(result.scalars().all())
 
 
 if __name__ == "__main__":
