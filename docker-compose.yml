@@ -30,8 +30,8 @@ services:
     build:
       context: ./frontend
       args:
-        # BACKEND_HOST: https://8pack-api.dreadrise.xyz
-        BACKEND_HOST: http://localhost:7600
+        BACKEND_HOST: https://8pack-api.dreadrise.xyz
+        # BACKEND_HOST: http://localhost:7600
     restart: always
     init: true
     ports:
