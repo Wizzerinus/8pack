@@ -142,6 +142,7 @@ class DraftResponse(FromObjectModel):
 
 
 class DraftPlaythroughResponse(FromObjectModel):
+    id: int
     player_id: int
     player_name: str
     created_at: datetime
@@ -151,6 +152,7 @@ class DraftPlaythroughResponse(FromObjectModel):
     @classmethod
     def from_object(cls, obj: model.DraftRun):
         return cls(
+            id=obj.id,
             player_id=obj.player_id,
             player_name=obj.player.name,
             created_at=obj.created_at,
