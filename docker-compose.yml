@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - 'POSTGRES_USER=user'
+      - 'POSTGRES_PASSWORD=password'
+      - 'POSTGRES_DB=8pack'
+    volumes:
+      - 8pack-postgres-data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_started
+    restart: always
+    environment:
+      - 'DB_URL=postgresql+psycopg2://user:password@postgres/8pack'
+      - 'DEBUG=0'
+      - 'JWT_KEY'
+    ports:
+      - '7600:8003'
+
+  frontend:
+    depends_on:
+      backend:
+        condition: service_started
+    build:
+      context: ./frontend
+      args:
+        # BACKEND_HOST: https://8pack-api.dreadrise.xyz
+        BACKEND_HOST: http://localhost:7600
+    restart: always
+    init: true
+    ports:
+      - '7601:80'
+
+volumes:
+  8pack-postgres-data:

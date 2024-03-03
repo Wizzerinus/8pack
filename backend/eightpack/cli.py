@@ -37,7 +37,7 @@ def dev_db():
 
 
 @cli.command()
-@click.argument("gzip_file", default="../draft_data_public.MKM.PremierDraft.csv.gz")
+@click.argument("gzip_file", default="local-premier")
 @click.argument("db_url", default="postgresql+psycopg2://user:password@localhost/dev")
 def import_drafts(gzip_file, db_url):
     do_imports(db_url, gzip_file)

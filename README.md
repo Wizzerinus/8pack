@@ -9,9 +9,20 @@
 
 ### Backend
 
-Requires Docker. Also currently requires that you download
+Requires Docker. I recommend that you download
 [this file](https://17lands-public.s3.amazonaws.com/analysis_data/draft_data/draft_data_public.MKM.PremierDraft.csv.gz)
-from 17lands and put it into the project root (will be amended later).
+if you prefer premier drafts (bo1), or
+[this file](https://17lands-public.s3.amazonaws.com/analysis_data/draft_data/draft_data_public.MKM.TradDraft.csv.gz)
+if you prefer traditional drafts (bo3).
+The `import-drafts` command changes according to the type of draft you chose:
+```shell
+python -m eightpack.cli import-drafts  # downloaded premier drafts
+python -m eightpack.cli import-drafts local-traditional  # downloaded traditional drafts
+python -m eightpack.cli import-drafts 17lands-premier  # automatically download premier drafts
+python -m eightpack.cli import-drafts 17lands-traditional  # automatically download traditional drafts
+```
+Note that if you use the 17lands one, you will have to download the file a lot during development
+if you mess with the database, I don't recommend that.
 
 ```shell
 cd backend
@@ -36,4 +47,11 @@ npm run dev  # this starts the webserver, default port 5173
 
 ## Production setup
 
-(WIP)
+```shell
+# this starts the servers
+docker-compose up
+# this creates the database and imports the drafts, change 17lands-traditional to 17lands-premier if you prefer these
+docker exec -it $(docker container ls | grep 8-pack | grep backend | awk '{print $1}') \
+  python -m eightpack.cli import-drafts 17lands-traditional \
+  'postgresql+psycopg2://user:password@postgres/8pack'
+```
