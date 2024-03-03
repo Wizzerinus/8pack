@@ -23,4 +23,5 @@ RUN npm run build
 
 # frontend isn't a composite app, so we make a compact image
 FROM nginx
-COPY --from=compiler /app/dist /usr/share/nginx/html
+COPY --from=compiler /app/dist /app
+COPY nginx.conf /etc/nginx/nginx.conf
